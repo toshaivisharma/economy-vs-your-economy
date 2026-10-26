@@ -4,38 +4,34 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap">
 <style>
-/* Layout: a single stage, like We Feel Fine's applet, with the filter bar above and movements as tabs. Paper by day, night sky by dark. */
+/* Layout: a scrollytelling story on a sticky stage (after The Pudding), then the We Feel Fine-style explorer:
+   filter bar, movements as tabs, one stage. One deliberate night theme: cream ink on warm near-black. */
 :root {
-  --bg: #e9e5dd;
-  --surface: #f3f0ea;
-  --ink: #23212a;
-  --ink-2: #55525c;
-  --ink-3: #85818c;
-  --rule: #d2cdc3;
-  --empty: #dcd7cd;
-  --c-stocks: #4a67b5;
-  --c-income: #d99a1c;
-  --c-gdp: #2f9a84;
-  --c-rent: #e0503f;
-  --c-food: #8b52a8;
+  --bg: #191817;
+  --surface: #211f1d;
+  --ink: #fffad7;
+  --ink-2: #cfc9ac;
+  --ink-3: #8f8a77;
+  --rule: #3a3733;
+  --empty: #2a2825;
+  /* series marks, in palette order; validated for colorblind separation on --bg */
+  --c-stocks: #9a4fc6;
+  --c-income: #c4870b;
+  --c-gdp: #14a49b;
+  --c-rent: #db4a28;
+  --c-food: #cc6ab4;
+  /* lighter tints of the same hues, for colored words in running text */
+  --t-stocks: #d795ff;
+  --t-income: #ffb102;
+  --t-gdp: #5fd3c9;
+  --t-rent: #ff8a65;
+  --t-food: #f29bdc;
   --f-display: "Young Serif", Georgia, "Times New Roman", serif;
-  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #1c1b22; --surface: #25242c; --ink: #ecebef; --ink-2: #b4b2bb; --ink-3: #807d89;
-    --rule: #34333c; --empty: #2a2932;
-    --c-stocks: #6a84d2; --c-income: #b88626; --c-gdp: #38a88f; --c-rent: #e15f4b; --c-food: #a06fc2;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #1c1b22; --surface: #25242c; --ink: #ecebef; --ink-2: #b4b2bb; --ink-3: #807d89;
-  --rule: #34333c; --empty: #2a2932;
-  --c-stocks: #6a84d2; --c-income: #b88626; --c-gdp: #38a88f; --c-rent: #e15f4b; --c-food: #a06fc2;
+  --f-body: "DM Sans", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+  --f-prose: "Iowan Old Style", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-data: "DM Mono", Menlo, Consolas, monospace;
   color-scheme: dark;
 }
 
@@ -74,7 +70,45 @@ h1 {
   margin: 0;
   text-wrap: balance;
 }
-.lede { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 17px; }
+.lede { margin: 0; max-width: 58ch; color: var(--ink-2); font-family: var(--f-prose); font-size: 20px; line-height: 1.5; }
+.w-stocks { color: var(--t-stocks); } .w-income { color: var(--t-income); } .w-gdp { color: var(--t-gdp); }
+.w-rent { color: var(--t-rent); } .w-food { color: var(--t-food); }
+
+/* Story: sticky stage, steps scroll over it */
+.story { position: relative; }
+.story-stage { position: sticky; top: 0; height: 100vh; height: 100svh; }
+#storyCanvas { display: block; width: 100%; height: 100%; }
+.steps { position: relative; z-index: 2; margin-top: -100vh; margin-top: -100svh; pointer-events: none; }
+.step { min-height: 92vh; display: flex; align-items: center; justify-content: center; padding-inline: 8px; }
+.step:first-child { min-height: 100vh; align-items: flex-end; padding-bottom: 12vh; }
+.step:last-child { padding-bottom: 12vh; }
+.step p {
+  pointer-events: auto;
+  max-width: 32ch;
+  margin: 0;
+  padding: 14px 20px;
+  font-family: var(--f-prose);
+  font-size: clamp(18px, 2.3vw, 22px);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--ink);
+  background: rgb(25 24 23 / .9);
+  border-radius: 4px;
+  box-shadow: 0 0 40px 24px rgb(25 24 23 / .55);
+  transition: opacity .4s ease;
+}
+.step:not(.active) p { opacity: .35; }
+@media (min-width: 900px) {
+  .step, .step:first-child { justify-content: flex-start; align-items: center; padding-bottom: 0; }
+  .step p { text-align: left; max-width: 28ch; margin-left: 1%; }
+  .step:last-child { padding-bottom: 12vh; }
+}
+.explore-head { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 4vw, 38px); margin: 24px 0 0; text-wrap: balance; }
+.explore-sub { margin: -8px 0 0; max-width: 62ch; color: var(--ink-2); }
+
+/* Embedded in the Streamlit app: explorer only */
+html.embed header, html.embed .story, html.embed footer, html.embed .explore-head, html.embed .explore-sub { display: none; }
+html.embed .wrap { padding-block: 8px 12px; }
 
 /* Filter bar */
 .filters {
@@ -308,8 +342,16 @@ footer code { font-family: var(--f-data); font-size: 12px; }
   <header>
     <div class="eyebrow">FRED · Federal Reserve Bank of St. Louis · 2000 to today</div>
     <h1>The Economy Feels Fine</h1>
-    <p class="lede">Every dot is one moment when a number moved: a month of rent, a month of groceries, a month of stock prices, a quarter of GDP, a year of household income. Pick a movement, then hover or tap any dot to read what happened.</p>
+    <p class="lede">The headline economy is <span class="w-stocks">stock prices</span> and <span class="w-gdp">GDP</span>. Your economy is <span class="w-income">your household's income</span>, your <span class="w-rent">rent</span> and your <span class="w-food">groceries</span>. Scroll to watch them drift apart.</p>
   </header>
+
+  <section class="story" id="story" aria-label="Story">
+    <div class="story-stage"><canvas id="storyCanvas" aria-hidden="true"></canvas></div>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <h2 class="explore-head">Every moment, yours to explore</h2>
+  <p class="explore-sub">Every dot is one moment when a number moved: a month of rent, groceries or stock prices, a quarter of GDP, a year of household income. Pick a movement, then hover or tap any dot to read what happened.</p>
 
   <div class="filters" role="group" aria-label="Filters">
     <div class="group" id="seriesChips"><span class="label">Show</span></div>
@@ -384,7 +426,7 @@ footer code { font-family: var(--f-data); font-size: 12px; }
     <p>Data: FRED, Federal Reserve Bank of St. Louis. Series <code>NASDAQCOM</code>, <code>A939RC0Q052SBEA</code>, <code>MEHOINUSA646N</code>, <code>CUSR0000SEHA</code>, <code>CPIFABSL</code>; inflation from <code>CPIAUCSL</code>; wages from <code>AHETPI</code>; grocery prices from BLS average prices (<code>APU0000708111</code>, <code>APU0000709112</code>, <code>APU0000702111</code>, <code>APU0000703112</code>). Data pulled <span id="built"></span>.</p>
     <p>Each move is the change from the previous reading at that series' own frequency. "After inflation" divides every series by the overall Consumer Price Index for the same period, so a rise means it beat inflation; for rent and groceries it means they got pricier relative to everything else. Stocks are the Nasdaq Composite averaged to months, because FRED only publishes the last 10 years of the S&amp;P&nbsp;500; Nasdaq leans toward tech and swings harder.</p>
     <p>Hours of work use the average hourly wage of production and nonsupervisory workers (about 80% of private-sector jobs). Rent in dollars starts from the Census 2000 median gross rent of $602 a month and grows with the rent CPI, which covers all tenants and trails new-lease rents by about a year.</p>
-    <p>After <a href="http://www.wefeelfine.org/" target="_blank" rel="noopener">We Feel Fine</a> by Jonathan Harris and Sep Kamvar, and <em>Dear Data</em> by Giorgia Lupi and Stefanie Posavec.</p>
+    <p>After <a href="http://www.wefeelfine.org/" target="_blank" rel="noopener">We Feel Fine</a> by Jonathan Harris and Sep Kamvar, <em>Dear Data</em> by Giorgia Lupi and Stefanie Posavec, and The Pudding's <a href="https://pudding.cool/2023/07/songwriters/" target="_blank" rel="noopener">songwriters story</a>.</p>
   </footer>
 </div>
 
@@ -408,8 +450,12 @@ footer code { font-family: var(--f-data); font-size: 12px; }
   const groups = {};
   for (const key of ORDER) {
     const arr = RAW.series[key];
+    // after-inflation level relative to the reading just before the first move (= 100)
+    const base = arr[0].rv / (1 + arr[0].r / 100);
+    const medR = median(arr.map(o => Math.abs(o.r))) || 1;
     groups[key] = arr.map((o, i) => ({ key, i, n: arr.length, d: o.d, y: +o.d.slice(0, 4), m: +o.d.slice(5, 7),
-                                       vN: o.v, vR: o.rv * RAW.cpiLatest, pN: o.p, pR: o.r }));
+                                       vN: o.v, vR: o.rv * RAW.cpiLatest, pN: o.p, pR: o.r,
+                                       cumR: o.rv / base * 100, magR: Math.abs(o.r) / medR }));
   }
   const recs = ORDER.flatMap(k => groups[k]);
   let real = true;
@@ -485,6 +531,8 @@ footer code { font-family: var(--f-data); font-size: 12px; }
     colors.ink = cs.getPropertyValue("--ink").trim();
     colors.empty = cs.getPropertyValue("--empty").trim();
     colors.ink3 = cs.getPropertyValue("--ink-3").trim();
+    colors.rule = cs.getPropertyValue("--rule").trim();
+    window.dispatchEvent(new Event("story-repaint"));
   }
   readColors();
 
@@ -847,6 +895,187 @@ footer code { font-family: var(--f-data); font-size: 12px; }
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint);
   new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   new ResizeObserver(() => { if (state.view === "madness") sizeCanvas(); }).observe(canvas);
+
+  // ---------- Story (scrollytelling, after The Pudding) ----------
+  // Fixed to after-inflation numbers; the explorer below has the switch.
+  function initStory() {
+    const cv = document.getElementById("storyCanvas"), sx = cv.getContext("2d");
+    const stepsBox = document.getElementById("steps");
+    const LANES = ["stocks", "gdp", "income", "rent", "food"];
+    const HEAD = new Set(["stocks", "gdp"]);
+    const last = k => groups[k][groups[k].length - 1];
+    const climb = k => Math.round(last(k).cumR - 100);
+    const firstYear = k => { const g = groups[k][0]; return +g.d.slice(0, 4) - (FREQ[k] === "year" ? 1 : 0); };
+    const w = (k, text) => `<span class="w-${k}">${text}</span>`;
+    const top50 = [...recs].sort((a, b) => b.magR - a.magR).slice(0, 50);
+    const SHOCK = new Set([2008, 2009, 2020, 2022]);
+    const nShock = top50.filter(r => SHOCK.has(r.y)).length;
+    const yrsIncome = +last("income").d.slice(0, 4) - firstYear("income");
+    const r = climb("rent"), inc = climb("income");
+
+    const STEPS = [
+      { layout: "swarm", text: `Since 2000, five numbers have moved ${recs.length.toLocaleString("en-US")} times. Each dot is one of those moves: a month, a quarter or a year.` },
+      { layout: "climb", text: `Put each dot where it happened in time, and as high as its number has climbed since 2000 after inflation. The dots become five lines.` },
+      { layout: "climb", hl: r => HEAD.has(r.key), text: `The headline economy took off. ${w("stocks", "Stocks")} are up ${climb("stocks")}% after inflation, and ${w("gdp", "GDP per person")} is up ${climb("gdp")}%.` },
+      { layout: "climb", hl: r => r.key === "income", text: `${w("income", "Median household income")} is up ${inc}% after inflation, over ${yrsIncome} years.` },
+      { layout: "climb", hl: r => r.key === "rent" || r.key === "food", text: `${w("rent", "Rent")} outran inflation by ${r}%${r > inc ? `, faster than ${w("income", "income")} grew` : ""}. ${w("food", "Groceries")} outran it by ${climb("food")}%.` },
+      { layout: "lanes", text: `Now let each dot rise or fall by how far it moved in its own period, compared with that series' usual move. Hollow dots are drops.` },
+      { layout: "lanes", hl: r => SHOCK.has(r.y), text: `Of the 50 biggest moves, ${nShock} came in three stretches: the 2008 crash, the 2020 pandemic and the 2022 inflation spike.` },
+      { layout: "swarm", text: `Below, every one of these moments is yours to explore. Hover or tap a dot to read what happened.` },
+    ];
+    stepsBox.innerHTML = STEPS.map((s, i) => `<div class="step${i ? "" : " active"}" data-i="${i}"><p>${s.text}</p></div>`).join("");
+
+    const tMin = 2000, tMax = Math.max(...recs.map(r => r.y + (r.m - 1) / 12));
+    const tOf = r => (r.y + (r.m - 1) / 12 - tMin) / (tMax - tMin);
+    const maxCum = Math.max(...recs.map(r => r.cumR)), minCum = Math.min(80, ...recs.map(r => r.cumR)) * 0.96;
+    const dots = recs.map(r => ({ r, x: 0, y: 0, tx: 0, ty: 0, a: 1, ta: 1, rad: 2.6, trad: 2.6, rx: Math.random(), ry: Math.random(), go: 0 }));
+    let W = 0, H = 0, dpr = 1, step = 0, layout = "swarm", hl = null, overlay = 0, running = false, placed = false;
+
+    // wide screens: text in a left column, chart on the right; narrow: text floats over the chart
+    const box = () => {
+      const narrow = W < 640, wide = W >= 900;
+      return { L: wide ? W * 0.4 : narrow ? 14 : 56, R: narrow ? 92 : 190, T: H * 0.12, B: H * 0.12 };
+    };
+    const yClimb = v => { const b = box(); return H - b.B - (v - minCum) / (maxCum * 1.04 - minCum) * (H - b.T - b.B); };
+    const xTime = r => { const b = box(); return b.L + tOf(r) * (W - b.L - b.R); };
+
+    function targets(now) {
+      const b = box();
+      dots.forEach(p => {
+        const r = p.r;
+        if (layout === "swarm") { p.tx = p.rx * W; p.ty = b.T * 0.5 + p.ry * (H - b.T); }
+        else if (layout === "climb") { p.tx = xTime(r); p.ty = yClimb(r.cumR); }
+        else {
+          const laneH = (H - b.T - b.B) / LANES.length, cy = b.T + laneH * (LANES.indexOf(r.key) + 0.5);
+          p.tx = xTime(r); p.ty = cy - Math.sign(r.pR) * Math.min(1, r.magR / 8) * laneH * 0.46;
+        }
+        const on = !hl || hl(r);
+        p.ta = on ? 1 : FADED;
+        p.trad = (layout === "swarm" ? 2.8 : 2.4) * (hl && on ? 1.35 : 1);
+        // stagger left to right through time, like a wave
+        p.go = now + (layout === "swarm" ? p.rx * 350 : tOf(r) * 650);
+      });
+      if (reduceMotion || !placed) dots.forEach(p => { p.x = p.tx; p.y = p.ty; p.a = p.ta; p.rad = p.trad; });
+      placed = true;
+    }
+    const FADED = 0.13;
+
+    function size() {
+      const rect = cv.getBoundingClientRect();
+      if (!rect.width) return;
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = rect.width; H = rect.height;
+      cv.width = W * dpr; cv.height = H * dpr;
+      targets(performance.now());
+      dots.forEach(p => { p.go = 0; });
+      draw(performance.now());
+    }
+
+    function setStep(i) {
+      if (i === step) return;
+      step = i;
+      stepsBox.querySelectorAll(".step").forEach(el => el.classList.toggle("active", +el.dataset.i === i));
+      const s = STEPS[i];
+      if (s.layout !== layout) overlay = 0;
+      layout = s.layout; hl = s.hl || null;
+      targets(performance.now());
+      if (reduceMotion) draw(performance.now());
+    }
+
+    function labelStack(items, minGap) {
+      items.sort((a, b) => a.y - b.y);
+      for (let i = 1; i < items.length; i++) if (items[i].y - items[i - 1].y < minGap) items[i].y = items[i - 1].y + minGap;
+      return items;
+    }
+
+    function drawOverlay(now) {
+      const b = box();
+      sx.font = `12px ${getComputedStyle(document.documentElement).getPropertyValue("--f-data")}`;
+      sx.globalAlpha = overlay * 0.9;
+      sx.fillStyle = colors.ink3; sx.strokeStyle = colors.rule;
+      if (layout === "climb" || layout === "lanes") {
+        sx.textAlign = "center"; sx.textBaseline = "top";
+        for (const yr of [2000, 2005, 2010, 2015, 2020, 2025]) {
+          if (yr > tMax) continue;
+          const x = b.L + (yr - tMin) / (tMax - tMin) * (W - b.L - b.R);
+          sx.fillText(yr, x, H - b.B + 14);
+        }
+      }
+      if (layout === "climb") {
+        const y100 = yClimb(100);
+        sx.setLineDash([2, 4]); sx.lineWidth = 1; sx.beginPath(); sx.moveTo(b.L, y100); sx.lineTo(W - b.R, y100); sx.stroke(); sx.setLineDash([]);
+        sx.textAlign = "left"; sx.textBaseline = "bottom"; sx.fillText("2000 level", b.L, y100 - 6);
+        const items = labelStack(LANES.map(k => ({ k, y: yClimb(last(k).cumR) })), 18);
+        sx.textBaseline = "middle"; sx.font = `13px ${getComputedStyle(document.documentElement).getPropertyValue("--f-body")}`;
+        items.forEach(it => {
+          const on = !hl || hl(groups[it.k][0]);
+          sx.globalAlpha = overlay * (on ? 1 : 0.3);
+          const x = W - b.R + 12;
+          sx.fillStyle = colors[it.k]; sx.beginPath(); sx.arc(x, it.y, 4, 0, Math.PI * 2); sx.fill();
+          sx.fillStyle = colors.ink;
+          const c = Math.round(last(it.k).cumR - 100);
+          sx.fillText(`${W < 640 ? "" : NAME[it.k] + " "}${c >= 0 ? "+" : "−"}${Math.abs(c)}%`, x + 10, it.y);
+        });
+      }
+      if (layout === "lanes") {
+        const laneH = (H - b.T - b.B) / LANES.length;
+        sx.textAlign = "left"; sx.textBaseline = "middle";
+        sx.font = `13px ${getComputedStyle(document.documentElement).getPropertyValue("--f-body")}`;
+        LANES.forEach((k, i) => {
+          const cy = b.T + laneH * (i + 0.5);
+          sx.globalAlpha = overlay * 0.5; sx.strokeStyle = colors.rule; sx.lineWidth = 1;
+          sx.beginPath(); sx.moveTo(b.L, cy); sx.lineTo(W - b.R, cy); sx.stroke();
+          sx.globalAlpha = overlay; sx.fillStyle = colors[k];
+          sx.beginPath(); sx.arc(W - b.R + 12, cy, 4, 0, Math.PI * 2); sx.fill();
+          sx.fillStyle = colors.ink; sx.fillText(NAME[k], W - b.R + 22, cy);
+        });
+      }
+      sx.globalAlpha = 1;
+    }
+
+    function draw(now) {
+      sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      sx.clearRect(0, 0, W, H);
+      overlay += (1 - overlay) * (reduceMotion ? 1 : 0.06);
+      drawOverlay(now);
+      const t = now * 0.0005;
+      for (const p of dots) {
+        if (!reduceMotion && now >= p.go) {
+          p.x += (p.tx - p.x) * 0.08; p.y += (p.ty - p.y) * 0.08;
+          p.rad += (p.trad - p.rad) * 0.1;
+        }
+        p.a += (p.ta - p.a) * (reduceMotion ? 1 : 0.1);
+        let x = p.x, y = p.y;
+        if (layout === "swarm" && !reduceMotion) { x += Math.sin(t + p.rx * 12) * 7; y += Math.cos(t * 0.8 + p.ry * 12) * 7; }
+        sx.globalAlpha = p.a;
+        sx.beginPath(); sx.arc(x, y, p.rad, 0, Math.PI * 2);
+        if (layout === "lanes" && p.r.pR < 0) { sx.lineWidth = 1.4; sx.strokeStyle = colors[p.r.key]; sx.stroke(); }
+        else { sx.fillStyle = colors[p.r.key]; sx.fill(); }
+      }
+      sx.globalAlpha = 1;
+    }
+
+    function frame(now) {
+      if (!running) return;
+      draw(now);
+      requestAnimationFrame(frame);
+    }
+
+    // which step is in the middle of the screen
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) setStep(+e.target.dataset.i); });
+    }, { rootMargin: "-45% 0px -45% 0px" });
+    stepsBox.querySelectorAll(".step").forEach(el => io.observe(el));
+    // only animate while the story is on screen
+    new IntersectionObserver(([e]) => {
+      const was = running; running = e.isIntersecting && !reduceMotion;
+      if (running && !was) requestAnimationFrame(frame);
+    }).observe(document.getElementById("story"));
+    new ResizeObserver(size).observe(cv);
+    size();
+    window.addEventListener("story-repaint", () => draw(performance.now()));
+  }
+  if (!document.documentElement.classList.contains("embed")) initStory();
 
   const start = (location.hash || "").slice(1);
   setView(["madness", "murmurs", "mounds", "rings", "hours"].includes(start) ? start : "madness");

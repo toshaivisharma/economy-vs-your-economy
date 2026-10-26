@@ -15,10 +15,11 @@ CENSUS_URL = "https://api.census.gov/data/2022/acs/acs1"
 # All series are nominal (as paid); app.py deflates them with CPI_ID on request,
 # so headline and household numbers are always measured the same way.
 # Stocks use the Nasdaq Composite because FRED only serves the last 10 years of SP500.
+# Order matters: it is the palette order in components/charts.py.
 SERIES = {
     "stocks": ("NASDAQCOM", "Nasdaq Composite", "Index level"),
-    "gdp": ("A939RC0Q052SBEA", "GDP per capita", "$ per person"),
     "income": ("MEHOINUSA646N", "Median household income", "$ per year"),
+    "gdp": ("A939RC0Q052SBEA", "GDP per capita", "$ per person"),
     "rent": ("CUSR0000SEHA", "Rent (CPI)", "CPI index, 1982-84=100"),
     "food": ("CPIFABSL", "Food at home (CPI)", "CPI index, 1982-84=100"),
 }

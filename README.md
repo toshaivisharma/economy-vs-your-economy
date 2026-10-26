@@ -3,7 +3,7 @@
 Has everyday life kept up with the headline economy since 2000? Two views of the same FRED data:
 
 - **Streamlit dashboard** (`app.py`): stocks, GDP per capita, median household income, rent and grocery prices, indexed or in their own units, with or without inflation; the stocks-vs-income gap; hours of work needed for rent and grocery staples; and a state rent-burden map (Census ACS).
-- **The Economy Feels Fine** (`feelings/`): a static page in the spirit of [We Feel Fine](http://www.wefeelfine.org/) and *Dear Data*, where every monthly, quarterly or yearly move is a dot. Five movements: Madness, Murmurs, Mounds, Rings, Hours.
+- **The Economy Feels Fine** (`feelings/`): a static page that opens with a scrollytelling story after The Pudding's [songwriters piece](https://pudding.cool/2023/07/songwriters/), then an explorer in the spirit of [We Feel Fine](http://www.wefeelfine.org/) and *Dear Data*, where every monthly, quarterly or yearly move is a dot. Five movements: Madness, Murmurs, Mounds, Rings, Hours. The dashboard embeds the explorer in its "Every moment" tab.
 
 ## Run the dashboard
 

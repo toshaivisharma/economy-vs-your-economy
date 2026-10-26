@@ -1,42 +1,38 @@
-# Matches feelings/template.html: paper by day, night sky by dark.
+# Pudding-style night stage, shared with feelings/template.html.
+# One deliberate dark theme: cream ink on warm near-black.
 [theme]
-font = "'Atkinson Hyperlegible', sans-serif"
+base = "dark"
+primaryColor = "#9a4fc6"
+backgroundColor = "#191817"
+secondaryBackgroundColor = "#24221f"
+textColor = "#fffad7"
+borderColor = "#3a3733"
+linkColor = "#d795ff"
+font = "'DM Sans', sans-serif"
 headingFont = "'Young Serif', serif"
-codeFont = "'IBM Plex Mono', monospace"
-baseRadius = "medium"
+codeFont = "'DM Mono', monospace"
+baseRadius = "full"
 showSidebarBorder = false
-primaryColor = "#4a67b5"
 
 [[theme.fontFaces]]
-family = "Atkinson Hyperlegible"
-url = "https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45GE5ZgpewSSbQ.ttf"
+family = "DM Sans"
+url = "https://fonts.gstatic.com/s/dmsans/v17/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwAopxRSW3w.woff"
 weight = 400
 
 [[theme.fontFaces]]
-family = "Atkinson Hyperlegible"
-url = "https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8WbcNcy-OZFy-FA.ttf"
+family = "DM Sans"
+url = "https://fonts.gstatic.com/s/dmsans/v17/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwARZtRSW3w.woff"
 weight = 700
 
 [[theme.fontFaces]]
-family = "Young Serif"
-url = "https://fonts.gstatic.com/s/youngserif/v2/3qTpojO2nS2VtkB3KtkQZ2t61EcYaQ7F.ttf"
+family = "DM Mono"
+url = "https://fonts.gstatic.com/s/dmmono/v16/aFTU7PB1QTsUX8KYthqQAg.woff"
+weight = 400
 
 [[theme.fontFaces]]
-family = "IBM Plex Mono"
-url = "https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n5ig.ttf"
+family = "Young Serif"
+url = "https://fonts.gstatic.com/s/youngserif/v2/3qTpojO2nS2VtkB3KtkQZ1t93kA.woff"
 
-[theme.light]
-base = "light"
-primaryColor = "#4a67b5"
-backgroundColor = "#e9e5dd"
-secondaryBackgroundColor = "#f3f0ea"
-textColor = "#23212a"
-borderColor = "#d2cdc3"
-
-[theme.dark]
-base = "dark"
-primaryColor = "#6a84d2"
-backgroundColor = "#1c1b22"
-secondaryBackgroundColor = "#25242c"
-textColor = "#ecebef"
-borderColor = "#34333c"
+[[theme.fontFaces]]
+family = "Source Serif 4"
+url = "https://fonts.gstatic.com/s/sourceserif4/v15/vEFy2_tTDB4M7-auWDN0ahZJW3IX2ih5nk3AucvUHf6OAVIJmeUDygwjihdqnhtdCA.woff"
