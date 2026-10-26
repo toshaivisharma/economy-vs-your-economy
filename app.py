@@ -11,6 +11,7 @@ st.set_page_config(page_title="Economy vs. Your Economy", page_icon="📉", layo
 
 C, T = charts.COLORS, charts.TEXT
 FEELINGS = Path(__file__).parent / "feelings" / "index.html"
+STORY_URL = "https://economy-feels-fine.vercel.app/"
 
 # Pudding-style night stage, shared with feelings/template.html: cream ink on warm
 # near-black, controls in one row above the content, everything else fades on focus.
@@ -228,7 +229,8 @@ with tab_moments:
             '<meta charset="utf-8">\n<script>document.documentElement.classList.add("embed")</script>', 1)
         components.html(page, height=980, scrolling=False)
         st.caption("Every monthly, quarterly and yearly move as a dot. Its data is a snapshot from the last "
-                   "build of feelings/index.html, so it doesn't follow the controls above.")
+                   "build of feelings/index.html, so it doesn't follow the controls above. "
+                   f"For the scrolling story version, open [The Economy Feels Fine]({STORY_URL}).")
     else:
         st.info("Run build_feelings_data.py to generate this view.")
 
@@ -250,6 +252,9 @@ with tab_map:
 
 # --- Footer ----------------------------------------------------------------------
 st.divider()
+st.markdown(f'<p class="lede" style="font-size:18px">Watch the two economies drift apart in '
+            f'<a href="{STORY_URL}" target="_blank">The Economy Feels Fine</a>, the scrolling story version.</p>',
+            unsafe_allow_html=True)
 st.caption(
     "Data: Federal Reserve Bank of St. Louis (FRED), including BLS consumer prices, average retail prices and "
     "hourly earnings; U.S. Census Bureau (Census 2000, ACS). Annual averages; the latest year is the average so far. "

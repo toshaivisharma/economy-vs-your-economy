@@ -98,6 +98,7 @@ h1 {
   transition: opacity .4s ease;
 }
 .step:not(.active) p { opacity: .35; }
+.step a { color: var(--ink); text-decoration-color: var(--t-stocks); text-underline-offset: 3px; }
 @media (min-width: 900px) {
   .step, .step:first-child { justify-content: flex-start; align-items: center; padding-bottom: 0; }
   .step p { text-align: left; max-width: 28ch; margin-left: 1%; }
@@ -426,6 +427,7 @@ footer code { font-family: var(--f-data); font-size: 12px; }
     <p>Data: FRED, Federal Reserve Bank of St. Louis. Series <code>NASDAQCOM</code>, <code>A939RC0Q052SBEA</code>, <code>MEHOINUSA646N</code>, <code>CUSR0000SEHA</code>, <code>CPIFABSL</code>; inflation from <code>CPIAUCSL</code>; wages from <code>AHETPI</code>; grocery prices from BLS average prices (<code>APU0000708111</code>, <code>APU0000709112</code>, <code>APU0000702111</code>, <code>APU0000703112</code>). Data pulled <span id="built"></span>.</p>
     <p>Each move is the change from the previous reading at that series' own frequency. "After inflation" divides every series by the overall Consumer Price Index for the same period, so a rise means it beat inflation; for rent and groceries it means they got pricier relative to everything else. Stocks are the Nasdaq Composite averaged to months, because FRED only publishes the last 10 years of the S&amp;P&nbsp;500; Nasdaq leans toward tech and swings harder.</p>
     <p>Hours of work use the average hourly wage of production and nonsupervisory workers (about 80% of private-sector jobs). Rent in dollars starts from the Census 2000 median gross rent of $602 a month and grows with the rent CPI, which covers all tenants and trails new-lease rents by about a year.</p>
+    <p>Compare the numbers year by year in the <a href="https://economy-vs-your-economy.streamlit.app/" target="_blank" rel="noopener">Economy vs. Your Economy dashboard</a>.</p>
     <p>After <a href="http://www.wefeelfine.org/" target="_blank" rel="noopener">We Feel Fine</a> by Jonathan Harris and Sep Kamvar, <em>Dear Data</em> by Giorgia Lupi and Stefanie Posavec, and The Pudding's <a href="https://pudding.cool/2023/07/songwriters/" target="_blank" rel="noopener">songwriters story</a>.</p>
   </footer>
 </div>
@@ -896,6 +898,8 @@ footer code { font-family: var(--f-data); font-size: 12px; }
   new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   new ResizeObserver(() => { if (state.view === "madness") sizeCanvas(); }).observe(canvas);
 
+  const DASHBOARD = "https://economy-vs-your-economy.streamlit.app/";
+
   // ---------- Story (scrollytelling, after The Pudding) ----------
   // Fixed to after-inflation numbers; the explorer below has the switch.
   function initStory() {
@@ -921,7 +925,7 @@ footer code { font-family: var(--f-data); font-size: 12px; }
       { layout: "climb", hl: r => r.key === "rent" || r.key === "food", text: `${w("rent", "Rent")} outran inflation by ${r}%${r > inc ? `, faster than ${w("income", "income")} grew` : ""}. ${w("food", "Groceries")} outran it by ${climb("food")}%.` },
       { layout: "lanes", text: `Now let each dot rise or fall by how far it moved in its own period, compared with that series' usual move. Hollow dots are drops.` },
       { layout: "lanes", hl: r => SHOCK.has(r.y), text: `Of the 50 biggest moves, ${nShock} came in three stretches: the 2008 crash, the 2020 pandemic and the 2022 inflation spike.` },
-      { layout: "swarm", text: `Below, every one of these moments is yours to explore. Hover or tap a dot to read what happened.` },
+      { layout: "swarm", text: `Below, every one of these moments is yours to explore. Hover or tap a dot to read what happened. For the numbers year by year, open the <a href="${DASHBOARD}" target="_blank" rel="noopener">dashboard</a>.` },
     ];
     stepsBox.innerHTML = STEPS.map((s, i) => `<div class="step${i ? "" : " active"}" data-i="${i}"><p>${s.text}</p></div>`).join("");
 
