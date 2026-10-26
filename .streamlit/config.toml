@@ -1,0 +1,42 @@
+# Matches feelings/template.html: paper by day, night sky by dark.
+[theme]
+font = "'Atkinson Hyperlegible', sans-serif"
+headingFont = "'Young Serif', serif"
+codeFont = "'IBM Plex Mono', monospace"
+baseRadius = "medium"
+showSidebarBorder = false
+primaryColor = "#4a67b5"
+
+[[theme.fontFaces]]
+family = "Atkinson Hyperlegible"
+url = "https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45GE5ZgpewSSbQ.ttf"
+weight = 400
+
+[[theme.fontFaces]]
+family = "Atkinson Hyperlegible"
+url = "https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8WbcNcy-OZFy-FA.ttf"
+weight = 700
+
+[[theme.fontFaces]]
+family = "Young Serif"
+url = "https://fonts.gstatic.com/s/youngserif/v2/3qTpojO2nS2VtkB3KtkQZ2t61EcYaQ7F.ttf"
+
+[[theme.fontFaces]]
+family = "IBM Plex Mono"
+url = "https://fonts.gstatic.com/s/ibmplexmono/v19/-F63fjptAgt5VM-kVkqdyU8n5ig.ttf"
+
+[theme.light]
+base = "light"
+primaryColor = "#4a67b5"
+backgroundColor = "#e9e5dd"
+secondaryBackgroundColor = "#f3f0ea"
+textColor = "#23212a"
+borderColor = "#d2cdc3"
+
+[theme.dark]
+base = "dark"
+primaryColor = "#6a84d2"
+backgroundColor = "#1c1b22"
+secondaryBackgroundColor = "#25242c"
+textColor = "#ecebef"
+borderColor = "#34333c"

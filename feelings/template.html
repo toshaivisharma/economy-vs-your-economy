@@ -1,0 +1,856 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Economy Feels Fine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single stage, like We Feel Fine's applet, with the filter bar above and movements as tabs. Paper by day, night sky by dark. */
+:root {
+  --bg: #e9e5dd;
+  --surface: #f3f0ea;
+  --ink: #23212a;
+  --ink-2: #55525c;
+  --ink-3: #85818c;
+  --rule: #d2cdc3;
+  --empty: #dcd7cd;
+  --c-stocks: #4a67b5;
+  --c-income: #d99a1c;
+  --c-gdp: #2f9a84;
+  --c-rent: #e0503f;
+  --c-food: #8b52a8;
+  --f-display: "Young Serif", Georgia, "Times New Roman", serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1b22; --surface: #25242c; --ink: #ecebef; --ink-2: #b4b2bb; --ink-3: #807d89;
+    --rule: #34333c; --empty: #2a2932;
+    --c-stocks: #6a84d2; --c-income: #b88626; --c-gdp: #38a88f; --c-rent: #e15f4b; --c-food: #a06fc2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1b22; --surface: #25242c; --ink: #ecebef; --ink-2: #b4b2bb; --ink-3: #807d89;
+  --rule: #34333c; --empty: #2a2932;
+  --c-stocks: #6a84d2; --c-income: #b88626; --c-gdp: #38a88f; --c-rent: #e15f4b; --c-food: #a06fc2;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 48px;
+  display: grid;
+  gap: 20px;
+}
+
+/* Masthead */
+header { display: grid; gap: 8px; }
+.eyebrow {
+  font-family: var(--f-data);
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+h1 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(34px, 6vw, 60px);
+  line-height: 1.02;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 17px; }
+
+/* Filter bar */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  align-items: center;
+  padding-block: 12px;
+  border-block: 1px solid var(--rule);
+}
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.group > .label {
+  font-family: var(--f-data);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-right: 4px;
+}
+button, select { font: inherit; color: inherit; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 14px;
+}
+.chip .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--c); border: 2px solid var(--c); }
+.chip[aria-pressed="false"] { background: transparent; color: var(--ink-3); }
+.chip[aria-pressed="false"] .dot { background: transparent; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg button {
+  border: 0;
+  background: transparent;
+  padding: 5px 11px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+select {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-family: var(--f-data);
+  font-size: 13px;
+}
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Movements */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px 26px; align-items: baseline; }
+.tab {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  cursor: pointer;
+  font-family: var(--f-display);
+  font-size: 24px;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tab:hover { color: var(--ink); }
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.status .count { font-family: var(--f-data); font-size: 13px; color: var(--ink-3); }
+
+.stage {
+  position: relative;
+  background: var(--surface);
+  border-radius: 14px;
+  min-height: 300px;
+  overflow: hidden;
+}
+.panel { position: relative; }
+
+/* Madness */
+#madness canvas { display: block; width: 100%; height: clamp(380px, 62vh, 600px); cursor: crosshair; }
+.legend-inline {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--ink-3);
+  pointer-events: none;
+  background: var(--surface);
+  padding: 5px 10px;
+  border-radius: 8px;
+  z-index: 2;
+}
+.legend-inline span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-inline i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink-3); }
+.legend-inline i.fill { background: var(--ink-3); }
+
+.card {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  max-width: 460px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .12);
+}
+.card .who { display: flex; align-items: center; gap: 8px; font-family: var(--f-data); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.card .who i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--c); }
+.card .who i.fill { background: var(--c); }
+.card p { margin: 0; font-family: var(--f-display); font-size: 21px; line-height: 1.28; }
+.card .meta { font-family: var(--f-data); font-size: 12px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.card .meta a { color: var(--ink-2); }
+.card .close {
+  position: absolute; top: 8px; right: 8px;
+  width: 30px; height: 30px; border: 0; background: none; cursor: pointer;
+  border-radius: 50%; font-size: 20px; line-height: 1; color: var(--ink-3);
+}
+.card .close:hover { background: var(--surface); color: var(--ink); }
+
+.tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.35;
+  max-width: 260px;
+  z-index: 3;
+}
+.tip b { font-weight: 700; }
+.tip .d { font-family: var(--f-data); font-size: 11px; opacity: .75; display: block; }
+
+/* Murmurs */
+#murmurs { padding: 8px 0; }
+.murmur-tools { display: flex; justify-content: flex-end; padding: 8px 18px 0; }
+.murmur-list { list-style: none; margin: 0; padding: 0 18px 12px; max-height: 600px; overflow-y: auto; }
+.murmur-list li {
+  display: grid;
+  grid-template-columns: 16px 76px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.murmur-list li:last-child { border-bottom: 0; }
+.murmur-list i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--c); transform: translateY(1px); }
+.murmur-list i.fill { background: var(--c); }
+.murmur-list time { font-family: var(--f-data); font-size: 12px; color: var(--ink-3); }
+.murmur-list span { font-size: 16px; }
+.murmur-list .big span { font-family: var(--f-display); font-size: 19px; }
+.subj { text-decoration: underline; text-decoration-color: var(--c); text-decoration-thickness: 3px; text-underline-offset: 4px; }
+
+/* Mounds */
+#mounds { padding: 24px 18px 28px; }
+.mounds { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 18px; align-items: end; }
+@media (max-width: 820px) {
+  .mounds { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mound:last-child:nth-child(odd) { grid-column: 1 / -1; max-width: 50%; justify-self: center; }
+}
+.mound { display: grid; gap: 6px; min-width: 0; }
+.mound svg { width: 100%; height: auto; display: block; overflow: visible; }
+.mound .pct { font-family: var(--f-display); font-size: 30px; line-height: 1; }
+.mound .name { display: flex; gap: 7px; align-items: center; font-weight: 700; font-size: 14px; }
+.mound .name i { width: 11px; height: 11px; border-radius: 50%; background: var(--c); flex: none; }
+.mound .sub { font-size: 13px; color: var(--ink-2); }
+.mound .span { font-family: var(--f-data); font-size: 11px; color: var(--ink-3); }
+.mound .bob { transform-origin: 50% 100%; animation: bob 4.2s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.035); } }
+.note { font-size: 13px; color: var(--ink-3); margin: 18px 0 0; max-width: 70ch; }
+
+/* Rings */
+#rings { padding: 16px 12px 20px; display: grid; justify-items: center; gap: 8px; }
+#rings svg { width: 100%; max-width: 660px; height: auto; display: block; }
+#rings .cell { stroke: var(--surface); stroke-width: 1; }
+#rings .cell:hover { stroke: var(--ink); stroke-width: 1.5; }
+.ring-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 13px; color: var(--ink-2); }
+.ring-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.ring-legend i { width: 11px; height: 11px; border-radius: 3px; background: var(--c); }
+
+/* Hours */
+#hours { padding: 22px 18px 26px; }
+.hours { display: grid; gap: 26px; }
+.hrow { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 10px 22px; align-items: start; }
+.hrow h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 20px; line-height: 1.2; }
+.hrow .chg { font-size: 14px; color: var(--ink-2); margin-top: 4px; }
+.hrow .chg b { font-family: var(--f-data); font-weight: 500; color: var(--ink); }
+.yrs { display: grid; gap: 10px; min-width: 0; }
+.yr { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: start; }
+.yr > time { font-family: var(--f-data); font-size: 12px; color: var(--ink-3); padding-top: 1px; }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.dots i { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--c); background: linear-gradient(90deg, var(--c) var(--f, 100%), transparent var(--f, 100%)); }
+.dots .val { font-family: var(--f-data); font-size: 12px; color: var(--ink-2); margin-left: 6px; white-space: nowrap; }
+.yr .how { grid-column: 2; font-size: 12px; color: var(--ink-3); margin-top: -4px; }
+@media (max-width: 560px) { .hrow { grid-template-columns: minmax(0, 1fr); } }
+
+footer { display: grid; gap: 6px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: 14px; }
+footer p { margin: 0; max-width: 90ch; }
+footer a { color: var(--ink-2); }
+footer code { font-family: var(--f-data); font-size: 12px; }
+
+@media (max-width: 560px) {
+  .tab { font-size: 20px; }
+  .card p { font-size: 18px; }
+  .murmur-list li { grid-template-columns: 14px 62px minmax(0, 1fr); gap: 8px; }
+  .legend-inline { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mound .bob { animation: none; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">FRED · Federal Reserve Bank of St. Louis · 2000 to today</div>
+    <h1>The Economy Feels Fine</h1>
+    <p class="lede">Every dot is one moment when a number moved: a month of rent, a month of groceries, a month of stock prices, a quarter of GDP, a year of household income. Pick a movement, then hover or tap any dot to read what happened.</p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filters">
+    <div class="group" id="seriesChips"><span class="label">Show</span></div>
+    <div class="group">
+      <span class="label">Years</span>
+      <select id="yFrom" aria-label="From year"></select>
+      <span aria-hidden="true">to</span>
+      <select id="yTo" aria-label="To year"></select>
+    </div>
+    <div class="group">
+      <span class="label">Dollars</span>
+      <div class="seg" id="realSeg">
+        <button type="button" data-real="real" aria-pressed="true">After inflation</button>
+        <button type="button" data-real="nom" aria-pressed="false">As paid</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="label">Moves</span>
+      <div class="seg" id="dirSeg">
+        <button type="button" data-dir="all" aria-pressed="true">All</button>
+        <button type="button" data-dir="up" aria-pressed="false">Rises</button>
+        <button type="button" data-dir="down" aria-pressed="false">Drops</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Movements">
+    <button class="tab" role="tab" id="tab-madness" data-view="madness" aria-selected="true">Madness</button>
+    <button class="tab" role="tab" id="tab-murmurs" data-view="murmurs" aria-selected="false">Murmurs</button>
+    <button class="tab" role="tab" id="tab-mounds" data-view="mounds" aria-selected="false">Mounds</button>
+    <button class="tab" role="tab" id="tab-rings" data-view="rings" aria-selected="false">Rings</button>
+    <button class="tab" role="tab" id="tab-hours" data-view="hours" aria-selected="false">Hours</button>
+  </div>
+  <div class="status"><span id="blurb"></span><span class="count" id="count"></span></div>
+
+  <div class="stage">
+    <section class="panel" id="madness" role="tabpanel" aria-labelledby="tab-madness">
+      <canvas id="swarm" aria-label="Swarm of dots, one per economic moment. The Murmurs tab lists the same moments as text."></canvas>
+      <div class="legend-inline"><span><i class="fill"></i>rose</span><span><i></i>fell</span><span>bigger dot = bigger move for that series</span></div>
+      <div class="card" id="card" hidden>
+        <button class="close" id="cardClose" type="button" aria-label="Close">×</button>
+        <div class="who" id="cardWho"></div>
+        <p id="cardText"></p>
+        <div class="meta" id="cardMeta"></div>
+      </div>
+    </section>
+    <section class="panel" id="murmurs" role="tabpanel" aria-labelledby="tab-murmurs" hidden>
+      <div class="murmur-tools">
+        <div class="seg" id="sortSeg">
+          <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+          <button type="button" data-sort="big" aria-pressed="false">Biggest</button>
+        </div>
+      </div>
+      <ol class="murmur-list" id="murmurList"></ol>
+    </section>
+    <section class="panel" id="mounds" role="tabpanel" aria-labelledby="tab-mounds" hidden>
+      <div class="mounds" id="moundGrid"></div>
+      <p class="note">Each mound's area is the total change from the first to the last reading in the years you picked. Every mound uses the same scale, so a mound twice the area is twice the climb. The rings inside count the share of periods that rose.</p>
+    </section>
+    <section class="panel" id="rings" role="tabpanel" aria-labelledby="tab-rings" hidden>
+      <svg id="ringSvg" viewBox="0 0 700 700" role="img" aria-label="Radial calendar. Rings are years, from the centre outward; wedges are months. Each cell is colored by the series that moved most that month, compared with its own usual move."></svg>
+      <div class="ring-legend" id="ringLegend"></div>
+    </section>
+    <section class="panel" id="hours" role="tabpanel" aria-labelledby="tab-hours" hidden>
+      <div class="hours" id="hoursList"></div>
+      <p class="note" id="hoursNote"></p>
+    </section>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+
+  <footer>
+    <p>Data: FRED, Federal Reserve Bank of St. Louis. Series <code>NASDAQCOM</code>, <code>A939RC0Q052SBEA</code>, <code>MEHOINUSA646N</code>, <code>CUSR0000SEHA</code>, <code>CPIFABSL</code>; inflation from <code>CPIAUCSL</code>; wages from <code>AHETPI</code>; grocery prices from BLS average prices (<code>APU0000708111</code>, <code>APU0000709112</code>, <code>APU0000702111</code>, <code>APU0000703112</code>). Data pulled <span id="built"></span>.</p>
+    <p>Each move is the change from the previous reading at that series' own frequency. "After inflation" divides every series by the overall Consumer Price Index for the same period, so a rise means it beat inflation; for rent and groceries it means they got pricier relative to everything else. Stocks are the Nasdaq Composite averaged to months, because FRED only publishes the last 10 years of the S&amp;P&nbsp;500; Nasdaq leans toward tech and swings harder.</p>
+    <p>Hours of work use the average hourly wage of production and nonsupervisory workers (about 80% of private-sector jobs). Rent in dollars starts from the Census 2000 median gross rent of $602 a month and grows with the rent CPI, which covers all tenants and trails new-lease rents by about a year.</p>
+    <p>After <a href="http://www.wefeelfine.org/" target="_blank" rel="noopener">We Feel Fine</a> by Jonathan Harris and Sep Kamvar, and <em>Dear Data</em> by Giorgia Lupi and Stefanie Posavec.</p>
+  </footer>
+</div>
+
+<script type="application/json" id="data">/*DATA*/</script>
+<script>
+(() => {
+  const RAW = JSON.parse(document.getElementById("data").textContent);
+  document.getElementById("built").textContent = RAW.built;
+
+  const ORDER = ["stocks", "income", "gdp", "rent", "food"];
+  const FREQ = { stocks: "month", income: "year", gdp: "quarter", rent: "month", food: "month" };
+  const NAME = { stocks: "Stocks", income: "Household income", gdp: "GDP per capita", rent: "Rent", food: "Groceries" };
+  const SUBJECT = { stocks: "the Nasdaq", income: "median household income", gdp: "GDP per capita", rent: "rent", food: "grocery prices" };
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- records ----------
+  // Each record keeps both readings: as paid (N) and after inflation (R). derive() picks one
+  // and recomputes everything that depends on it (size, rank, "biggest since", sentence).
+  const median = a => { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  const groups = {};
+  for (const key of ORDER) {
+    const arr = RAW.series[key];
+    groups[key] = arr.map((o, i) => ({ key, i, n: arr.length, d: o.d, y: +o.d.slice(0, 4), m: +o.d.slice(5, 7),
+                                       vN: o.v, vR: o.rv * RAW.cpiLatest, pN: o.p, pR: o.r }));
+  }
+  const recs = ORDER.flatMap(k => groups[k]);
+  let real = true;
+
+  function derive() {
+    for (const key of ORDER) {
+      const arr = groups[key];
+      arr.forEach(r => { r.p = real ? r.pR : r.pN; r.v = real ? r.vR : r.vN; });
+      const abs = arr.map(r => Math.abs(r.p));
+      const med = median(abs) || 1;
+      const sorted = [...abs].sort((a, b) => a - b);
+      arr.forEach((r, i) => {
+        let since = null;
+        for (let j = i - 1; j >= 0; j--) {
+          const q = arr[j];
+          if (Math.sign(q.p) === Math.sign(r.p) && Math.abs(q.p) >= Math.abs(r.p)) { since = j; break; }
+        }
+        r.rank = sorted.findIndex(v => v >= abs[i]) / Math.max(1, sorted.length - 1);
+        r.mag = abs[i] / med;
+        r.since = since === null ? null : arr[since].d;
+        r.gap = since === null ? i : i - since;
+        r.text = sentence(r);
+      });
+    }
+  }
+  const when = (key, d) => {
+    const y = d.slice(0, 4), m = +d.slice(5, 7);
+    if (FREQ[key] === "year") return y;
+    if (FREQ[key] === "quarter") return `Q${Math.floor((m - 1) / 3) + 1} ${y}`;
+    return `${MONTHS[m - 1]} ${y}`;
+  };
+  const whenShort = (key, d) => {
+    const y = d.slice(0, 4), m = +d.slice(5, 7);
+    if (FREQ[key] === "year") return y;
+    if (FREQ[key] === "quarter") return `Q${Math.floor((m - 1) / 3) + 1} ${y}`;
+    return `${MONTHS[m - 1].slice(0, 3)} ${y}`;
+  };
+  const pctTxt = p => { const a = Math.abs(p); return (a < 1 ? a.toFixed(2) : a.toFixed(1)) + "%"; };
+  const per = { month: "month", quarter: "quarter", year: "year" };
+
+  function sentence(r) {
+    const f = FREQ[r.key];
+    if (r.p === 0) return `In ${when(r.key, r.d)}, ${SUBJECT[r.key]} held flat from the ${per[f]} before.`;
+    const verb = r.p > 0 ? "rose" : "fell";
+    const noun = r.p > 0 ? "rise" : "drop";
+    let s = `In ${when(r.key, r.d)}, ${SUBJECT[r.key]} ${verb} ${pctTxt(r.p)}${real ? " after inflation" : ""} from the ${per[f]} before`;
+    const minGap = f === "month" ? 12 : f === "quarter" ? 8 : 4;
+    if (r.since === null && r.i >= minGap) s += `, the biggest ${per[f]}ly ${noun} in this record`;
+    else if (r.since !== null && r.gap >= minGap) s += `, the biggest ${per[f]}ly ${noun} since ${when(r.key, r.since)}`;
+    return s + ".";
+  }
+  const fmtVal = r => {
+    if (r.key === "income" || r.key === "gdp") {
+      const usd = "$" + Math.round(r.v).toLocaleString("en-US");
+      return real ? `${usd} in ${whenShort("rent", RAW.cpiLatestDate)} dollars` : `${usd} as paid`;
+    }
+    if (r.key === "stocks") return r.vN.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " points";
+    return r.vN.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " on the price index";
+  };
+  derive();
+
+  // ---------- state ----------
+  const years = [...new Set(recs.map(r => r.y))].sort((a, b) => a - b);
+  const state = { on: new Set(ORDER), from: years[0], to: years[years.length - 1], dir: "all", view: "madness", sort: "new" };
+  const visible = r => state.on.has(r.key) && r.y >= state.from && r.y <= state.to &&
+    (state.dir === "all" || (state.dir === "up" ? r.p > 0 : r.p < 0));
+
+  let colors = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ORDER) colors[k] = cs.getPropertyValue("--c-" + k).trim();
+    colors.surface = cs.getPropertyValue("--surface").trim();
+    colors.ink = cs.getPropertyValue("--ink").trim();
+    colors.empty = cs.getPropertyValue("--empty").trim();
+    colors.ink3 = cs.getPropertyValue("--ink-3").trim();
+  }
+  readColors();
+
+  // ---------- filters ----------
+  const chips = document.getElementById("seriesChips");
+  for (const k of ORDER) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(--c-${k})`);
+    b.setAttribute("aria-pressed", "true"); b.dataset.key = k;
+    b.innerHTML = `<span class="dot"></span>${NAME[k]}`;
+    b.addEventListener("click", () => {
+      if (state.on.has(k)) { if (state.on.size > 1) state.on.delete(k); } else state.on.add(k);
+      b.setAttribute("aria-pressed", state.on.has(k));
+      update();
+    });
+    chips.appendChild(b);
+  }
+  const yFrom = document.getElementById("yFrom"), yTo = document.getElementById("yTo");
+  for (const y of years) { yFrom.add(new Option(y, y)); yTo.add(new Option(y, y)); }
+  yFrom.value = state.from; yTo.value = state.to;
+  yFrom.addEventListener("change", () => { state.from = +yFrom.value; if (state.from > state.to) { state.to = state.from; yTo.value = state.to; } update(); });
+  yTo.addEventListener("change", () => { state.to = +yTo.value; if (state.to < state.from) { state.from = state.to; yFrom.value = state.from; } update(); });
+  const segPick = (seg, attr, cb) => seg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    cb(b.dataset[attr]);
+  });
+  segPick(document.getElementById("dirSeg"), "dir", v => { state.dir = v; update(); });
+  segPick(document.getElementById("sortSeg"), "sort", v => { state.sort = v; renderMurmurs(); });
+  segPick(document.getElementById("realSeg"), "real", v => {
+    real = v === "real";
+    derive();
+    parts.sort((a, b) => b.r.rank - a.r.rank);
+    if (W) sizeCanvas();
+    if (pinned) openCard(pinned);
+    update();
+  });
+
+  // ---------- tabs ----------
+  const BLURB = {
+    madness: "Every moment at once, drifting. Filled dots rose, hollow dots fell.",
+    murmurs: "The same moments as sentences.",
+    mounds: "How far each series climbed across the years you picked.",
+    rings: "One cell per month. The color is whichever series moved most that month, compared with its own usual move.",
+    hours: "What rent and groceries cost in time at the average hourly wage. Uses the years you pick; wages and prices are both as paid, so inflation cancels out.",
+  };
+  const tabs = [...document.querySelectorAll(".tab")];
+  function setView(v) {
+    state.view = v;
+    tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.view === v));
+    document.querySelectorAll(".panel").forEach(p => { p.hidden = p.id !== v; });
+    hideTip();
+    if (v === "madness") sizeCanvas();
+    update();
+  }
+  tabs.forEach(t => t.addEventListener("click", () => {
+    setView(t.dataset.view);
+    try { history.replaceState(null, "", "#" + t.dataset.view); } catch (e) {}
+  }));
+  document.querySelector(".tabs").addEventListener("keydown", e => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const i = tabs.findIndex(t => t.dataset.view === state.view);
+    const n = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    n.focus(); n.click();
+  });
+
+  // ---------- tooltip ----------
+  const tip = document.getElementById("tip"), stage = document.querySelector(".stage");
+  function showTip(html, x, y) {
+    tip.innerHTML = html; tip.hidden = false;
+    const sw = stage.clientWidth, tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = x + 14, top = y + 14;
+    if (left + tw > sw - 8) left = x - tw - 14;
+    if (top + th > stage.clientHeight - 8) top = y - th - 14;
+    tip.style.left = Math.max(8, left) + "px"; tip.style.top = Math.max(8, top) + "px";
+  }
+  function hideTip() { tip.hidden = true; }
+  const tipFor = r => `<span class="d">${whenShort(r.key, r.d)} · ${NAME[r.key]}</span><b>${r.p > 0 ? "+" : r.p < 0 ? "−" : ""}${pctTxt(r.p)}</b> ${r.p > 0 ? "rise" : r.p < 0 ? "drop" : ""}`;
+
+  // ---------- Madness ----------
+  const canvas = document.getElementById("swarm"), ctx = canvas.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+  const parts = recs.map(r => ({ r, x: Math.random(), y: Math.random(), vx: 0, vy: 0, a: 1, ta: 1, rad: 0 }))
+    .sort((a, b) => b.r.rank - a.r.rank);
+  let hover = null, pinned = null, mouse = null;
+
+  function sizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width) return;
+    const first = !W;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    const nw = rect.width, nh = rect.height;
+    if (!first) parts.forEach(p => { p.x *= nw / W; p.y *= nh / H; });
+    W = nw; H = nh;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    const k = Math.max(0.65, Math.min(1, W / 950));
+    parts.forEach(p => {
+      if (first) { p.x *= W; p.y *= H; }
+      p.rad = (3 + 11 * Math.pow(p.r.rank, 1.6)) * k;
+    });
+    draw();
+  }
+
+  function step() {
+    for (const p of parts) {
+      p.a += (p.ta - p.a) * 0.12;
+      if (reduceMotion) continue;
+      p.vx += (Math.random() - 0.5) * 0.05; p.vy += (Math.random() - 0.5) * 0.05;
+      if (mouse) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+        if (d2 < 6400 && d2 > 1) { const f = (1 - Math.sqrt(d2) / 80) * 0.35; p.vx += dx / Math.sqrt(d2) * f; p.vy += dy / Math.sqrt(d2) * f; }
+      }
+      p.vx *= 0.96; p.vy *= 0.96;
+      if (p === hover || p === pinned) { p.vx *= 0.5; p.vy *= 0.5; }
+      p.x += p.vx; p.y += p.vy;
+      const m = p.rad;
+      if (p.x < -m) p.x = W + m; else if (p.x > W + m) p.x = -m;
+      if (p.y < -m) p.y = H + m; else if (p.y > H + m) p.y = -m;
+    }
+  }
+
+  function draw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    for (const p of parts) {
+      if (p.a < 0.02) continue;
+      const c = colors[p.r.key];
+      ctx.globalAlpha = p.a * (pinned && pinned !== p ? 0.55 : 1);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.rad, 0, Math.PI * 2);
+      if (p.r.p >= 0) {
+        ctx.fillStyle = c; ctx.fill();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = colors.surface; ctx.stroke();
+      } else {
+        ctx.fillStyle = colors.surface; ctx.fill();
+        ctx.lineWidth = Math.max(1.6, p.rad * 0.28); ctx.strokeStyle = c; ctx.stroke();
+      }
+      if (p === hover || p === pinned) {
+        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(p.x, p.y, p.rad + 4, 0, Math.PI * 2);
+        ctx.lineWidth = 1.5; ctx.strokeStyle = colors.ink; ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function loop() {
+    if (state.view === "madness" && W) { step(); draw(); }
+    requestAnimationFrame(loop);
+  }
+
+  function hit(x, y) {
+    let best = null, bd = Infinity;
+    for (const p of parts) {
+      if (p.ta < 0.5) continue;
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < p.rad + 5 && d < bd) { bd = d; best = p; }
+    }
+    return best;
+  }
+  canvas.addEventListener("pointermove", e => {
+    const b = canvas.getBoundingClientRect();
+    const x = e.clientX - b.left, y = e.clientY - b.top;
+    mouse = { x, y };
+    hover = hit(x, y);
+    if (hover) showTip(tipFor(hover.r), x, y); else hideTip();
+    if (reduceMotion) draw();
+  });
+  canvas.addEventListener("pointerleave", () => { mouse = null; hover = null; hideTip(); if (reduceMotion) draw(); });
+  canvas.addEventListener("click", e => {
+    const b = canvas.getBoundingClientRect();
+    const p = hit(e.clientX - b.left, e.clientY - b.top);
+    if (p) openCard(p); else closeCard();
+  });
+
+  const card = document.getElementById("card");
+  function openCard(p) {
+    pinned = p; const r = p.r;
+    card.style.setProperty("--c", `var(--c-${r.key})`);
+    document.getElementById("cardWho").innerHTML = `<i class="${r.p >= 0 ? "fill" : ""}"></i>${NAME[r.key]} · ${whenShort(r.key, r.d)}`;
+    document.getElementById("cardText").textContent = r.text;
+    const id = RAW.meta[r.key].id;
+    document.getElementById("cardMeta").innerHTML = `<span>${fmtVal(r)}</span><span>${r.mag.toFixed(1)}× its usual ${FREQ[r.key]}</span><a href="https://fred.stlouisfed.org/series/${id}" target="_blank" rel="noopener">FRED ${id}</a>`;
+    card.hidden = false; hideTip(); draw();
+  }
+  function closeCard() { pinned = null; card.hidden = true; draw(); }
+  document.getElementById("cardClose").addEventListener("click", closeCard);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeCard(); });
+
+  // ---------- Murmurs ----------
+  const list = document.getElementById("murmurList");
+  function renderMurmurs() {
+    let rows = recs.filter(visible);
+    rows = state.sort === "new"
+      ? rows.sort((a, b) => b.d.localeCompare(a.d) || ORDER.indexOf(a.key) - ORDER.indexOf(b.key))
+      : rows.sort((a, b) => b.mag - a.mag);
+    const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    list.innerHTML = rows.map(r => {
+      const subj = esc(SUBJECT[r.key]);
+      const body = esc(r.text).replace(subj, `<span class="subj">${subj}</span>`);
+      return `<li class="${r.rank > 0.9 ? "big" : ""}" style="--c:var(--c-${r.key})"><i class="${r.p >= 0 ? "fill" : ""}" aria-hidden="true"></i><time>${whenShort(r.key, r.d)}</time><span>${body}</span></li>`;
+    }).join("") || `<li><span></span><span></span><span>No moments match these filters. Turn a series back on or widen the years.</span></li>`;
+  }
+
+  // ---------- Mounds ----------
+  const grid = document.getElementById("moundGrid");
+  function renderMounds() {
+    const stats = ORDER.filter(k => state.on.has(k)).map(k => {
+      const rs = recs.filter(r => r.key === k && r.y >= state.from && r.y <= state.to);
+      if (rs.length < 2) return { k, empty: true };
+      // cumulative change from the reading before the first move in range to the last reading
+      const first = rs[0], last = rs[rs.length - 1];
+      const startV = first.v / (1 + first.p / 100);
+      const c = (last.v / startV - 1) * 100;
+      const ups = rs.filter(r => r.p > 0).length;
+      return { k, c, ups, n: rs.length, from: first, to: last };
+    });
+    const maxC = Math.max(1, ...stats.filter(s => !s.empty).map(s => Math.abs(s.c)));
+    const R = 92;
+    grid.innerHTML = stats.map((s, i) => {
+      if (s.empty) return `<div class="mound" style="--c:var(--c-${s.k})"><div class="name"><i></i>${NAME[s.k]}</div><div class="sub">Not enough readings in these years.</div></div>`;
+      const r = Math.max(4, R * Math.sqrt(Math.abs(s.c) / maxC));
+      const up = s.c >= 0;
+      const share = s.ups / s.n;
+      const arcs = [];
+      // concentric rings: as many as tenths of periods that rose (Dear Data style)
+      const nRings = Math.round(share * 10);
+      for (let j = 1; j <= nRings; j++) {
+        const rr = r * (1 - j / 11);
+        if (rr < 3) break;
+        arcs.push(up ? `<path d="M${100 - rr},100 A${rr},${rr} 0 0 1 ${100 + rr},100" fill="none" stroke="var(--surface)" stroke-width="1.5" opacity=".55"/>`
+                     : `<path d="M${100 - rr},100 A${rr},${rr} 0 0 0 ${100 + rr},100" fill="none" stroke="var(--surface)" stroke-width="1.5" opacity=".55"/>`);
+      }
+      const shape = up
+        ? `<path d="M${100 - r},100 A${r},${r} 0 0 1 ${100 + r},100 Z" fill="var(--c-${s.k})"/>`
+        : `<path d="M${100 - r},100 A${r},${r} 0 0 0 ${100 + r},100 Z" fill="var(--c-${s.k})"/>`;
+      const vb = up ? "0 0 200 104" : "0 96 200 104";
+      return `<div class="mound" style="--c:var(--c-${s.k})">
+        <svg viewBox="${vb}" aria-hidden="true"><g class="bob" style="animation-delay:${-i * 0.7}s">${shape}${arcs.join("")}</g><line x1="0" x2="200" y1="100" y2="100" stroke="var(--rule)" stroke-width="1"/></svg>
+        <div class="pct">${s.c >= 0 ? "+" : "−"}${Math.abs(s.c).toFixed(0)}%</div>
+        <div class="name"><i></i>${NAME[s.k]}</div>
+        <div class="sub">Rose in ${s.ups} of ${s.n} ${FREQ[s.k]}s</div>
+        <div class="span">${whenShort(s.k, s.from.d)} → ${whenShort(s.k, s.to.d)}</div>
+      </div>`;
+    }).join("");
+  }
+
+  // ---------- Rings ----------
+  const svg = document.getElementById("ringSvg");
+  const cx = 350, cy = 350, R0 = 74, R1 = 300, GAP = 0.42;
+  const pt = (r, a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  function sector(r0, r1, a0, a1) {
+    const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0);
+    return `M${x0.toFixed(1)},${y0.toFixed(1)}A${r1},${r1} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)}L${x2.toFixed(1)},${y2.toFixed(1)}A${r0},${r0} 0 0 0 ${x3.toFixed(1)},${y3.toFixed(1)}Z`;
+  }
+  let ringCells = [];
+  function renderRings() {
+    const ys = years.filter(y => y >= state.from && y <= state.to);
+    const rw = (R1 - R0) / Math.max(1, ys.length);
+    const span = Math.PI * 2 - GAP, mw = span / 12;
+    const byCell = new Map();
+    for (const r of recs) {
+      if (!visible(r)) continue;
+      const id = r.y + "-" + r.m;
+      const cur = byCell.get(id);
+      if (!cur || r.mag > cur.mag) byCell.set(id, r);
+    }
+    const counts = Object.fromEntries(ORDER.map(k => [k, 0]));
+    let out = "";
+    ringCells = [];
+    ys.forEach((y, yi) => {
+      const r0 = R0 + yi * rw + 0.6, r1 = R0 + (yi + 1) * rw - 0.6;
+      for (let m = 1; m <= 12; m++) {
+        const a0 = GAP / 2 + (m - 1) * mw + 0.006, a1 = GAP / 2 + m * mw - 0.006;
+        const w = byCell.get(y + "-" + m);
+        if (w) counts[w.key]++;
+        ringCells.push(w || null);
+        out += `<path class="cell" data-i="${ringCells.length - 1}" d="${sector(r0, r1, a0, a1)}" fill="${w ? `var(--c-${w.key})` : "var(--empty)"}"/>`;
+      }
+    });
+    // month labels
+    for (let m = 1; m <= 12; m++) {
+      const a = GAP / 2 + (m - 0.5) * mw, [x, y] = pt(R1 + 18, a);
+      out += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="var(--ink-3)">${MONTHS[m - 1].slice(0, 3)}</text>`;
+    }
+    // year labels in the gap at the top
+    const every = ys.length > 14 ? 5 : ys.length > 6 ? 2 : 1;
+    ys.forEach((y, yi) => {
+      const isLast = yi === ys.length - 1;
+      if (yi % every && !(isLast && yi % every >= 2)) return;
+      const r = R0 + (yi + 0.5) * rw;
+      out += `<text x="${cx}" y="${(cy - r).toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-family="IBM Plex Mono, monospace" font-size="${Math.min(12, Math.max(9, rw))}" fill="var(--ink-2)">${y}</text>`;
+    });
+    const filled = Object.values(counts).reduce((a, b) => a + b, 0);
+    out += `<text x="${cx}" y="${cy - 8}" text-anchor="middle" font-family="Young Serif, Georgia, serif" font-size="30" fill="var(--ink)">${filled}</text>`;
+    out += `<text x="${cx}" y="${cy + 16}" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="13" fill="var(--ink-3)">months</text>`;
+    svg.innerHTML = out;
+    document.getElementById("ringLegend").innerHTML = ORDER.filter(k => state.on.has(k))
+      .map(k => `<span style="--c:var(--c-${k})"><i></i>${NAME[k]} · ${counts[k]}</span>`).join("");
+  }
+  svg.addEventListener("pointermove", e => {
+    const t = e.target.closest(".cell");
+    if (!t) return hideTip();
+    const r = ringCells[+t.dataset.i];
+    const b = stage.getBoundingClientRect();
+    if (!r) return hideTip();
+    showTip(`<span class="d">${whenShort(r.key, r.d)} · biggest mover</span>${NAME[r.key]} <b>${r.p >= 0 ? "+" : "−"}${pctTxt(r.p)}</b>, ${r.mag.toFixed(1)}× its usual ${FREQ[r.key]}`, e.clientX - b.left, e.clientY - b.top);
+  });
+  svg.addEventListener("pointerleave", hideTip);
+
+  // ---------- Hours ----------
+  function renderHours() {
+    const H = RAW.hours;
+    const ys = Object.keys(H).map(Number).filter(y => y >= state.from && y <= state.to).sort((a, b) => a - b);
+    const box = document.getElementById("hoursList"), note = document.getElementById("hoursNote");
+    if (!ys.length) { box.innerHTML = "<p>No wage data in these years. Widen the year range.</p>"; note.textContent = ""; return; }
+    const y0 = ys[0], y1 = ys[ys.length - 1];
+    const items = [{ k: "rent", label: "A month's rent", unit: "hours", one: "hour", c: "rent",
+                     cost: h => "$" + Math.round(h.rent_dollars).toLocaleString("en-US") }]
+      .concat(Object.entries(RAW.groceries).map(([k, label]) => ({ k, label, unit: "minutes", one: "minute", c: "food",
+                     cost: h => "$" + h[k + "_price"].toFixed(2) })));
+    const dots = v => {
+      const whole = Math.floor(v), frac = v - whole;
+      let out = "<i></i>".repeat(whole);
+      if (frac >= 0.05) out += `<i style="--f:${Math.round(frac * 100)}%"></i>`;
+      return out;
+    };
+    const row = (it, y) => {
+      const h = H[y];
+      return `<div class="yr"><time>${y}</time><div class="dots" role="img" aria-label="${h[it.k].toFixed(1)} ${it.unit} in ${y}">${dots(h[it.k])}<span class="val">${h[it.k].toFixed(1)} ${it.unit}</span></div>
+        <div class="how">${it.cost(h)} ÷ $${h.wage.toFixed(2)} an hour</div></div>`;
+    };
+    box.innerHTML = items.map(it => {
+      const a = H[y0][it.k], b = H[y1][it.k], d = b - a;
+      const chg = y0 === y1 ? "" : Math.abs(d) < 0.05
+        ? `<div class="chg">About the same as ${y0}</div>`
+        : `<div class="chg"><b>${d > 0 ? "+" : "−"}${Math.abs(d).toFixed(1)}</b> ${it.unit} ${d > 0 ? "more" : "less"} than ${y0}</div>`;
+      return `<div class="hrow" style="--c:var(--c-${it.c})"><div><h3>${it.label}</h3>${chg}</div>
+        <div class="yrs">${row(it, y0)}${y0 === y1 ? "" : row(it, y1)}</div></div>`;
+    }).join("");
+    note.textContent = `Each dot is one hour of work for rent, or one minute for groceries.${y1 === new Date().getFullYear() ? ` ${y1} is the average so far this year.` : ""}`;
+  }
+
+  // ---------- update ----------
+  function update() {
+    let n = 0;
+    for (const p of parts) { const v = visible(p.r); p.ta = v ? 1 : 0; if (v) n++; }
+    if (pinned && pinned.ta === 0) closeCard();
+    if (reduceMotion) { parts.forEach(p => { p.a = p.ta; }); draw(); }
+    document.getElementById("blurb").textContent = BLURB[state.view];
+    document.getElementById("count").textContent = state.view === "hours"
+      ? `${state.from}–${state.to}`
+      : `${n} moments · ${state.from}–${state.to} · ${real ? "after inflation" : "as paid"}`;
+    if (state.view === "murmurs") renderMurmurs();
+    if (state.view === "mounds") renderMounds();
+    if (state.view === "rings") renderRings();
+    if (state.view === "hours") renderHours();
+  }
+
+  // theme changes repaint the canvas
+  const repaint = () => { readColors(); draw(); };
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", repaint);
+  new MutationObserver(repaint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  new ResizeObserver(() => { if (state.view === "madness") sizeCanvas(); }).observe(canvas);
+
+  const start = (location.hash || "").slice(1);
+  setView(["madness", "murmurs", "mounds", "rings", "hours"].includes(start) ? start : "madness");
+  sizeCanvas();
+  requestAnimationFrame(loop);
+})();
+</script>
